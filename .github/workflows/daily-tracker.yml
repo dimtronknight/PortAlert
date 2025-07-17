@@ -1,0 +1,80 @@
+name: Daily Investment Tracker
+
+on:
+  schedule:
+    # Run daily at 8:30 AM UTC (adjust timezone as needed)
+    - cron: '30 8 * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  track-portfolio:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22.5'
+        
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+          
+    - name: Download dependencies
+      run: go mod download
+      
+    - name: Run portfolio tracker
+      env:
+        # Trading212 Configuration
+        TRADING212_API_KEY: ${{ secrets.TRADING212_API_KEY }}
+        TRADING212_IS_LIVE: ${{ secrets.TRADING212_IS_LIVE }}
+        
+        # Telegram Configuration
+        NOTIFICATION_METHODS: telegram
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        
+        # MongoDB Configuration
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        MONGODB_DATABASE: investment_tracker
+        
+        # API Keys
+        CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
+        BULLION_API_KEY: ${{ secrets.BULLION_API_KEY }}
+        BULLION_API_URL: ${{ secrets.BULLION_API_URL }}
+        
+      run: |
+        echo "🚀 Starting daily portfolio tracking..."
+        go run cmd/notify.go now
+        echo "✅ Portfolio tracking completed!"
+        
+    - name: Save to database
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        MONGODB_DATABASE: investment_tracker
+        TRADING212_API_KEY: ${{ secrets.TRADING212_API_KEY }}
+        TRADING212_IS_LIVE: ${{ secrets.TRADING212_IS_LIVE }}
+        CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
+        BULLION_API_KEY: ${{ secrets.BULLION_API_KEY }}
+        BULLION_API_URL: ${{ secrets.BULLION_API_URL }}
+      run: |
+        echo "💾 Saving portfolio data to database..."
+        go run cmd/database.go save
+        echo "✅ Data saved successfully!"
+        
+    - name: Show today's stats
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        MONGODB_DATABASE: investment_tracker
+      run: |
+        echo "📊 Today's portfolio stats:"
+        go run cmd/database.go today || echo "No data found for today"

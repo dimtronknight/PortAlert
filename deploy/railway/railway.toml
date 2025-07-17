@@ -1,0 +1,20 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "deploy/docker/Dockerfile"
+
+[deploy]
+startCommand = "./daily-run.sh"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[env]
+TRADING212_API_KEY = { $ref = "TRADING212_API_KEY" }
+TRADING212_IS_LIVE = { $ref = "TRADING212_IS_LIVE" }
+TELEGRAM_BOT_TOKEN = { $ref = "TELEGRAM_BOT_TOKEN" }
+TELEGRAM_CHAT_ID = { $ref = "TELEGRAM_CHAT_ID" }
+MONGODB_URI = { $ref = "MONGODB_URI" }
+MONGODB_DATABASE = "investment_tracker"
+NOTIFICATION_METHODS = "telegram"
+CMC_API_KEY = { $ref = "CMC_API_KEY" }
+BULLION_API_KEY = { $ref = "BULLION_API_KEY" }
+BULLION_API_URL = { $ref = "BULLION_API_URL" }

@@ -1,0 +1,79 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # Run daily at 9 AM UTC (adjust timezone as needed)
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+jobs:
+  deploy:
+    name: Deploy Investment Tracker
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22.5'
+    
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Build application
+      run: go build -o investment-tracker .
+    
+    - name: Run investment tracker
+      env:
+        CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
+        BULLION_API_KEY: ${{ secrets.BULLION_API_KEY }}
+        BULLION_API_URL: ${{ secrets.BULLION_API_URL }}
+        TRADING212_API_KEY: ${{ secrets.TRADING212_API_KEY }}
+        TRADING212_IS_LIVE: ${{ secrets.TRADING212_IS_LIVE }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      run: |
+        echo "Running investment tracker..."
+        ./investment-tracker
+        echo "Investment tracker completed successfully"
+    
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-logs-${{ github.run_number }}
+        path: |
+          *.log
+          logs/
+        retention-days: 30

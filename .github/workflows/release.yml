@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22.5'
+    
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Build for multiple platforms
+      run: |
+        mkdir -p release
+        
+        # Linux AMD64
+        GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ github.ref_name }}" -o release/investment-tracker-linux-amd64 .
+        tar -czf release/investment-tracker-linux-amd64.tar.gz -C release investment-tracker-linux-amd64
+        
+        # Windows AMD64
+        GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${{ github.ref_name }}" -o release/investment-tracker-windows-amd64.exe .
+        zip -j release/investment-tracker-windows-amd64.zip release/investment-tracker-windows-amd64.exe
+        
+        # macOS AMD64
+        GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${{ github.ref_name }}" -o release/investment-tracker-darwin-amd64 .
+        tar -czf release/investment-tracker-darwin-amd64.tar.gz -C release investment-tracker-darwin-amd64
+        
+        # macOS ARM64
+        GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.version=${{ github.ref_name }}" -o release/investment-tracker-darwin-arm64 .
+        tar -czf release/investment-tracker-darwin-arm64.tar.gz -C release investment-tracker-darwin-arm64
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        echo "## Changes" > CHANGELOG.md
+        git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG.md
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        cat CHANGELOG.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          release/*.tar.gz
+          release/*.zip
+        body: ${{ steps.changelog.outputs.CHANGELOG }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
