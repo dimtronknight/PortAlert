@@ -1,0 +1,29 @@
+{
+    "crypto": {
+      "BTC": 0,
+      "ETH": 0.008,
+      "SOL": 0,
+      "XRP": 0,
+      "LTC": 1,
+      "DOGE": 528,
+      "ADA": 104,
+      "BGB": 10.6,
+      "AVAX": 0,
+      "XLM": 1.5,
+      "HYPE": 0,
+      "USDC": 0,
+      "TRX": 400
+    },
+
+    "bullion": {
+      "XAU": 1.53,
+      "XAG": 0
+    },
+    
+    "stocks": {
+
+    },
+
+    "savings": {}
+  }
+  
