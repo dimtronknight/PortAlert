@@ -45,10 +45,28 @@ jobs:
     - name: Download dependencies
       run: go mod download
     
+    - name: Create .env file
+      run: |
+        cat > .env << EOF
+        CMC_API_KEY=${{ secrets.CMC_API_KEY }}
+        BULLION_API_KEY=${{ secrets.BULLION_API_KEY }}
+        BULLION_API_URL=${{ secrets.BULLION_API_URL }}
+        TRADING212_API_KEY=${{ secrets.TRADING212_API_KEY }}
+        TRADING212_IS_LIVE=${{ secrets.TRADING212_IS_LIVE }}
+        TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+        SMTP_HOST=${{ secrets.SMTP_HOST }}
+        SMTP_PORT=${{ secrets.SMTP_PORT }}
+        SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
+        SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+        EMAIL_FROM=${{ secrets.EMAIL_FROM }}
+        EMAIL_TO=${{ secrets.EMAIL_TO }}
+        EOF
+
     - name: Build application
       run: go build -o investment-tracker .
     
-    - name: Run investment tracker
+    - name: Run investment tracker with notifications
       env:
         CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
         BULLION_API_KEY: ${{ secrets.BULLION_API_KEY }}
@@ -64,8 +82,9 @@ jobs:
         EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
         EMAIL_TO: ${{ secrets.EMAIL_TO }}
       run: |
-        echo "Running investment tracker..."
-        ./investment-tracker
+        echo "🚀 Starting daily portfolio tracking..."
+        echo "Sending current portfolio notification..."
+        go run cmd/notify.go now
         echo "Investment tracker completed successfully"
     
     - name: Upload logs

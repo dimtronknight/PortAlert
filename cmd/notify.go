@@ -97,7 +97,7 @@ func main() {
 
 func getPortfolioValues() (total, stocks, crypto, bullion float64, err error) {
 	// Load existing holdings
-	h, err := portfolio.LoadHoldings("/Users/ivanrusev/Documents/LP/Go/Investment-tracker/config/holdings.json")
+	h, err := portfolio.LoadHoldings("config/holdings.json")
 	if err != nil {
 		return 0, 0, 0, 0, fmt.Errorf("failed to load holdings: %w", err)
 	}

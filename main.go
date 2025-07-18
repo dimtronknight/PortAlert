@@ -11,7 +11,7 @@ import (
 func main() {
 	var h *portfolio.Holdings
 
-	h, err := portfolio.LoadHoldings("/Users/ivanrusev/Documents/LP/Go/Investment-tracker/config/holdings.json")
+	h, err := portfolio.LoadHoldings("config/holdings.json")
 	if err != nil {
 		log.Fatal(err)
 	}
