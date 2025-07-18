@@ -15,7 +15,7 @@ var cmcBaseURL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/lat
 func GetCryptoPrice(symbol string) (float64, error) {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Printf("Info: No .env file found, using environment variables: %v", err)
 	}
 
 	apiKey := os.Getenv("CMC_API_KEY")

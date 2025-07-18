@@ -14,7 +14,7 @@ import (
 func GetBullionPrices(bullion string, currency string) (*BullionPriceResponse, error) {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Printf("Info: No .env file found, using environment variables: %v", err)
 	}
 
 	apiKey := os.Getenv("BULLION_API_KEY")
