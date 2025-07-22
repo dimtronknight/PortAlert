@@ -1,23 +1,23 @@
 {
     "crypto": {
       "BTC": 0,
-      "ETH": 0.008,
+      "ETH": 0,
       "SOL": 0,
       "XRP": 0,
-      "LTC": 1,
-      "DOGE": 528,
-      "ADA": 104,
-      "BGB": 10.6,
+      "LTC": 0,
+      "DOGE": 0,
+      "ADA": 0,
+      "BGB": 0,
       "AVAX": 0,
-      "XLM": 1.5,
+      "XLM": 0,
       "HYPE": 0,
       "USDC": 0,
-      "TRX": 400
+      "TRX": 0
     },
 
     "bullion": {
-      "XAU": 1.53,
-      "XAG": 0
+      "XAU": 0.1,
+      "XAG": 1
     },
     
     "stocks": {
